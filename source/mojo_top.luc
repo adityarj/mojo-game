@@ -38,17 +38,18 @@ module mojo_top (
     reset_cond.in = ~rst_n; // input raw inverted reset signal
     rst = reset_cond.out;   // conditioned reset
     
-    //Check if reset signal has been asserted 
+    //Check if reset signal has been asserted, basiscally, at this step, the game is reset
     if (io_dip[0]) {
       //Reset game, set current number to random 0-9, assign new numbers and operators to the user
       current_num.d = pn_gen.num;
       
-      //Below are the four inputs that are going to somehow magically appear.
+      //Below are the four inputs that are going to somehow magically generate a number from 0-9
       number_sequence.d[0] = pn_gen.num;
       number_sequence.d[1] = pn_gen.num;
       number_sequence.d[2] = pn_gen.num;
       number_sequence.d[3] = pn_gen.num;
       
+      //Below two numbers magically select a sign
       operator_sequence.d[0] = pn_gen.num;
       operator_sequence.d[1] = pn_gen.num;
       
@@ -56,7 +57,7 @@ module mojo_top (
        
     }
     
-    //Check for change in outputed numbers
+    //Check for change in outputed random numbers
     if (io_dip[1]) {
     
       if (i.q == 3) {
@@ -78,6 +79,7 @@ module mojo_top (
       
     }
     
+    //User has hit enter button, calculate the new current number and check accordingly
     if (io_dip[3]) {
     
       case(operator_sequence.q[j.q]) {
@@ -99,12 +101,13 @@ module mojo_top (
           io_led[8] = 1; //Win
       } 
       
-      //Below are the four inputs that are going to somehow magically appear.
+      //Below are the four inputs that are going to somehow magically generate a number from 0-9
       number_sequence.d[0] = pn_gen.num;
       number_sequence.d[1] = pn_gen.num;
       number_sequence.d[2] = pn_gen.num;
       number_sequence.d[3] = pn_gen.num;
       
+      //Below two numbers magically select a sign
       operator_sequence.d[0] = pn_gen.num;
       operator_sequence.d[1] = pn_gen.num;
       
