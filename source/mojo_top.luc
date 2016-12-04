@@ -97,8 +97,12 @@ module mojo_top (
       
       if (current_num.q > 63) {
           io_led[9] = 1; //loss
+          io_led[8] = 0;
+          //Write code that resets the game
       } else if (current_num.q <= 0) {
           io_led[8] = 1; //Win
+          io_led[9] = 0;
+          //Write code that resets the game
       } 
       
       //Below are the four inputs that are going to somehow magically generate a number from 0-9
