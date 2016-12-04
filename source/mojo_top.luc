@@ -7,29 +7,58 @@ module mojo_top (
     input spi_sck,          // AVR SPI Clock
     input avr_tx,           // AVR TX (FPGA RX)
     input avr_rx_busy,       // AVR RX buffer full
-    input io_dip[4]
+    input io_dip[4],
+    output io_led[1]
   ) {
   
   sig rst;                  // reset signal
+  sig number_sequence[4][6];
+  sig operator_sequence[2];
+  
+  dff current_num[6](.clk(clk), .rst(rst));
+  dff i[2](.clk(clk), .rst(rst));
+  dff j[2](.clk(clk), .rst(rst));
+  
   
   .clk(clk) {
     // The reset conditioner is used to synchronize the reset signal to the FPGA
     // clock. This ensures the entire FPGA comes out of reset at the same time.
     reset_conditioner reset_cond;
+    .rst(rst) {
+      pn_gen pn_gen;
+    }
+    
   }
   
   always {
+  
+    number_sequence[0] = pn_gen.num;
+    number_sequence[1] = pn_gen.num;
+    number_sequence[2] = pn_gen.num;
+    number_sequence[3] = pn_gen.num;
+    operator_sequence = pn_gen.num;
+  
     reset_cond.in = ~rst_n; // input raw inverted reset signal
     rst = reset_cond.out;   // conditioned reset
     
     //Check if reset signal has been asserted 
     if (io_dip[0]) {
       //Reset game, set current number to random 0-9, assign new numbers and operators to the user
+      current_num.d = pn_gen.num;
+      
+      
     }
     
     //Check for change in outputed numbers
     if (io_dip[1]) {
+    
+      if (i.q == 3) {
+        i.d = 0;
+      } else {
+        i.d = i.q + 1;
+      }
       
+      //Output number_sequence[i]
     }
     
     //Check for change in assigned operators
@@ -37,7 +66,36 @@ module mojo_top (
       
     }
     
+    if (io_dip[3]) {
+      case(operator_sequence) {
+        2b00: //Performs + operation
+          current_num.d = current_num.q + number_sequence[i.q];
+        2b01: //Performs - operation
+          current_num.d = current_num.q - number_sequence[i.q];
+        2b10: //Performs * operation
+          current_num.d = current_num.q * number_sequence[i.q];
+        2b11: //Performs / operation
+          current_num.d = current_num.q / number_sequence[i.q];
+        default: 
+          current_num.d = 0;    
+      }
+      
+      if (current_num.q > 63) {
+          //Loss
+      } else if (current_num.q <= 0) {
+          //Win
+      }
+      
+    }
     
+    pn_gen.next = 1;
+    pn_gen.seed = 0;
+    
+    //Below are the four inputs that are going to somehow magically appear.
+    number_sequence[0] = pn_gen.num;
+    number_sequence[1] = pn_gen.num;
+    number_sequence[2] = pn_gen.num;
+    number_sequence[3] = pn_gen.num;
   
   }
 }
