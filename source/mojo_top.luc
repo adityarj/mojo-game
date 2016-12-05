@@ -8,17 +8,21 @@ module mojo_top (
     input avr_tx,           // AVR TX (FPGA RX)
     input avr_rx_busy,       // AVR RX buffer full
     input io_dip[4],
-    output io_led[16] //Assign LEDs as 5,4 -> operator LEDs, 3-0 -> RNG LEDs
+    output io_led[19] //Assign LEDs as 5,4 -> operator LEDs, 3-0 -> RNG LEDs
 
   ) {
   
   sig rst;                  // reset signal
   dff number_sequence[4][4](.clk(clk), .rst(rst));
-  dff operator_sequence[2][4](.clk(clk), .rst(rst));
+  dff operator_sequence[2][2](.clk(clk), .rst(rst));
   
-  dff current_num[6](.clk(clk), .rst(rst));
+  dff current_num[12](.clk(clk), .rst(rst));
   dff i[2](.clk(clk), .rst(rst));
   dff j[2](.clk(clk), .rst(rst));
+  dff reset_condition(.clk(clk), .rst(rst));
+  dff change_i_condition(.clk(clk), .rst(rst));
+  dff change_j_condition(.clk(clk), .rst(rst));
+  dff enter_condition(.clk(clk), .rst(rst));
   
   
   .clk(clk) {
@@ -27,38 +31,82 @@ module mojo_top (
     reset_conditioner reset_cond;
     .rst(rst) {
       pn_gen pn_gen;
+      pn_gen pn_gen2;
+      pn_gen pn_gen3;
+      pn_gen pn_gen4;
+      pn_gen pn_gen5;
+      pn_gen pn_gen6;
     }
     
   }
   
   always {
   
-    io_led[7:0] = 0 ;
+    io_led[18:0] = 0 ;
   
     reset_cond.in = ~rst_n; // input raw inverted reset signal
     rst = reset_cond.out;   // conditioned reset
     
     //Check if reset signal has been asserted, basiscally, at this step, the game is reset
-    if (io_dip[0]) {
+    if (io_dip[0] && !reset_condition.q) {
+    
+      io_led[16] = 1;
       //Reset game, set current number to random 0-9, assign new numbers and operators to the user
-      current_num.d = pn_gen.num;
+      current_num.d = pn_gen.num[3:0];
+      
+      reset_condition.d = 1;
       
       //Below are the four inputs that are going to somehow magically generate a number from 0-9
-      number_sequence.d[0] = pn_gen.num;
-      number_sequence.d[1] = pn_gen.num;
-      number_sequence.d[2] = pn_gen.num;
-      number_sequence.d[3] = pn_gen.num;
+      //We mod these inputs by 10 to make sure they are always from 0-9
+      if (pn_gen.num < 10) {
+        number_sequence.d[0] = pn_gen.num; 
+      } else {
+        number_sequence.d[0] = pn_gen.num - (pn_gen.num/10)*10;
+      }
+      
+      if (pn_gen2.num < 10) {
+        number_sequence.d[1] = pn_gen2.num; 
+      } else {
+        number_sequence.d[1] = pn_gen2.num - (pn_gen2.num/10)*10;
+      }
+      
+      if (pn_gen3.num < 10) {
+        number_sequence.d[2] = pn_gen3.num; 
+      } else {
+        number_sequence.d[2] = pn_gen3.num - (pn_gen3.num/10)*10;
+      }
+      
+      if (pn_gen4.num < 10) {
+        number_sequence.d[3] = pn_gen4.num; 
+      } else {
+        number_sequence.d[3] = pn_gen4.num - (pn_gen4.num/10)*10;
+      }
       
       //Below two numbers magically select a sign
-      operator_sequence.d[0] = pn_gen.num;
-      operator_sequence.d[1] = pn_gen.num;
+      //%ing them with 4
+      if (pn_gen5.num < 4) {
+        operator_sequence.d[0] = pn_gen5.num;
+      } else {
+        operator_sequence.d[0] = pn_gen5.num - (pn_gen5.num/4)*4;
+      }
       
-      //Hook numbers to outputs
+      if (pn_gen6.num < 4) {
+        operator_sequence.d[1] = pn_gen6.num;
+      } else {
+        operator_sequence.d[1] = pn_gen6.num - (pn_gen6.num/4)*4;
+      }
        
+    } else if (!io_dip[0] && reset_condition.q) {
+    
+      io_led[16] = 0;
+      reset_condition.d = 0;
+      
     }
     
     //Check for change in outputed random numbers
-    if (io_dip[1]) {
+    if (io_dip[1] && !change_i_condition.q) {
+    
+       io_led[17] = 1;
     
       if (i.q == 3) {
         i.d = 0;
@@ -66,10 +114,17 @@ module mojo_top (
         i.d = i.q + 1;
       }
       
+      change_i_condition.d = 1;
+      
+    } else if (!io_dip[1] && change_i_condition.q) {
+      
+      io_led[17] = 0;
+      change_i_condition.d = 0;
+      
     }
     
     //Check for change in assigned operators
-    if (io_dip[2]) {
+    if (io_dip[2] && !change_j_condition.q) {
     
       if (j.q == 1) {
         j.d = 0;
@@ -77,10 +132,16 @@ module mojo_top (
         j.d = 1;
       }
       
+      change_j_condition.d = 1;
+      
+    } else if (!io_dip[2] && change_j_condition.q) {
+      change_j_condition.d = 0;
     }
     
     //User has hit enter button, calculate the new current number and check accordingly
-    if (io_dip[3]) {
+    if (io_dip[3] && !enter_condition.q) {
+    
+      io_led[18] = 1;
     
       case(operator_sequence.q[j.q]) {
         2b00: //Performs + operation
@@ -95,37 +156,94 @@ module mojo_top (
           current_num.d = 0;    
       }
       
-      if (current_num.q > 63) {
-          io_led[9] = 1; //loss
-          io_led[8] = 0;
-          //Write code that resets the game
-      } else if (current_num.q <= 0) {
-          io_led[8] = 1; //Win
-          io_led[9] = 0;
-          //Write code that resets the game
-      } 
       
       //Below are the four inputs that are going to somehow magically generate a number from 0-9
-      number_sequence.d[0] = pn_gen.num;
-      number_sequence.d[1] = pn_gen.num;
-      number_sequence.d[2] = pn_gen.num;
-      number_sequence.d[3] = pn_gen.num;
+      //We mod these inputs by 10 to make sure they are always from 0-9
+      if (pn_gen.num < 10) {
+        number_sequence.d[0] = pn_gen.num; 
+      } else {
+        number_sequence.d[0] = pn_gen.num - (pn_gen.num/10)*10;
+      }
+      
+      if (pn_gen2.num < 10) {
+        number_sequence.d[1] = pn_gen2.num; 
+      } else {
+        number_sequence.d[1] = pn_gen2.num - (pn_gen2.num/10)*10;
+      }
+      
+      if (pn_gen3.num < 10) {
+        number_sequence.d[2] = pn_gen3.num; 
+      } else {
+        number_sequence.d[2] = pn_gen3.num - (pn_gen3.num/10)*10;
+      }
+      
+      if (pn_gen4.num < 10) {
+        number_sequence.d[3] = pn_gen4.num; 
+      } else {
+        number_sequence.d[3] = pn_gen4.num - (pn_gen4.num/10)*10;
+      }
       
       //Below two numbers magically select a sign
-      operator_sequence.d[0] = pn_gen.num;
-      operator_sequence.d[1] = pn_gen.num;
+      //%ing them with 4
+      if (pn_gen5.num < 4) {
+        operator_sequence.d[0] = pn_gen5.num;
+      } else {
+        operator_sequence.d[0] = pn_gen5.num - (pn_gen5.num/4)*4;
+      }
+      
+      if (pn_gen6.num < 4) {
+        operator_sequence.d[1] = pn_gen6.num;
+      } else {
+        operator_sequence.d[1] = pn_gen6.num - (pn_gen6.num/4)*4;
+      }
+      
+      enter_condition.d = 1;
+      
+    } else if (!io_dip[3] && enter_condition.q) {
+    
+      io_led[18] = 0;
+      enter_condition.d = 0;
       
     }
     
     //Output for number_sequence
     io_led[3:0] = number_sequence.q[i.q];
     //output for operator_sequence
-    io_led[7:4] = operator_sequence.q[j.q];
+    io_led[7:6] = operator_sequence.q[j.q];
     //Output for current_num
     io_led[15:10] = current_num.q;
     
+    io_led[18:16] = 0;
+    
+    if (current_num.q > 63) {
+          io_led[9] = 1; //loss
+          io_led[8] = 0;
+          //Write code that resets the game
+     } else if (current_num.q <= 0) {
+          io_led[8] = 1; //Win
+          io_led[9] = 0;
+          //Write code that resets the game
+     } 
+    
+    //RNG functions that are clock dependant
+    
     pn_gen.next = 1;
     pn_gen.seed = 0;
+    
+    pn_gen2.next = 3;
+    pn_gen2.seed = 1;
+    
+    pn_gen3.next = 3;
+    pn_gen3.seed = 2;
+    
+    pn_gen4.next = 2;
+    pn_gen4.seed = 3;
+    
+    pn_gen5.next = 1;
+    pn_gen5.seed = 19 + pn_gen6.num;
+    
+    pn_gen6.next = 1;
+    pn_gen6.seed = 21 + pn_gen5.num;
     
   }
 }
