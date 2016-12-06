@@ -33,6 +33,8 @@ module mojo_top (
   dff change_j_condition(.clk(clk), .rst(rst));
   dff enter_condition(.clk(clk), .rst(rst));
  
+  alu alu;
+ 
  
   .clk(clk) {
     // The reset conditioner is used to synchronize the reset signal to the FPGA
@@ -55,6 +57,9 @@ module mojo_top (
     output_digit_less = 0;
    
     io_led[18:0] = 0 ;
+    alu.a = 0;
+    alu.b = 0;
+    alu.alufn = 0;
  
     reset_cond.in = ~rst_n; // input raw inverted reset signal
     rst = reset_cond.out;   // conditioned reset
@@ -156,19 +161,25 @@ module mojo_top (
     if (enter && !enter_condition.q) {
    
       io_led[18] = 1;
+     
+      alu.a = current_num.q;
+      alu.b = number_sequence.q[i.q];
    
       case(operator_sequence.q[j.q]) {
         2b00: //Performs + operation
-          current_num.d = current_num.q + number_sequence.q[i.q];
+          alu.alufn = 6b000000;
         2b01: //Performs - operation
-          current_num.d = current_num.q - number_sequence.q[i.q];
+          alu.alufn = 6b000001;
         2b10: //Performs * operation
-          current_num.d = current_num.q * number_sequence.q[i.q];
+          alu.alufn = 6b000010;
         2b11: //Performs / operation
-          current_num.d = current_num.q / number_sequence.q[i.q];
+          alu.alufn = 6b000011;
         default:
+          alu.alufn = 6b000000;
           current_num.d = 0;    
       }
+     
+      current_num.d = alu.alu_result;
      
      
       //Below are the four inputs that are going to somehow magically generate a number from 0-9

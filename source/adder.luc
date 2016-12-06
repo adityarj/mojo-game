@@ -1,0 +1,44 @@
+module adder (
+    input a[6],
+    input b[6],
+    output s[6],
+    input alufn [6],
+    output v,
+    output n,
+    output z
+  ) {
+  
+  sig sum[9]; //9 bit to account for overflow and prevent exceptions being thrown for no reason
+  
+  always {
+  
+    //Default s and sum to zero initially
+    s = 0;
+    sum = 0;
+    
+    //Pure switch cases for the adder circuit
+    case(alufn) {
+       6b000000:
+        s = a+b; //Add
+        sum = a+b;
+       6b000001:
+        s = a-b; //Subtract
+        sum = a-b;  
+       6b000010:
+        s = a*b; //Multiply, carried over from multiplier
+        sum = a*b;
+       6b000011:
+        s = a/b;
+        sum = a/b; 
+       default:
+        s = a-b; //All other cases are assumed subtration for convenience
+        sum = a-b;
+    }
+    
+    //Z,V and N for the adder.
+    n = sum[5];
+    v = ( a[5] & b[5] & (~sum[5])) | 
+          ((~a[5])&(~b[5])&sum[5]);
+    z = ~|sum;
+ }
+}

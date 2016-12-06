@@ -1,0 +1,109 @@
+module alu (
+
+    
+    /*We assign 8 of the LEDs to show the 8 bit output that any component will display
+    as well as Z,V and N and in the case of a comparator, an additional 8 LEDs showing the comparator itself.
+    
+    We then assign a 6 bit input in the form of IO switches to control the ALUFN*/
+       
+    output alu_result[6],
+    output z,
+    output v,
+    output n,
+    input alufn[6],
+    input a[6],
+    input b[6]
+        
+  ) {
+  
+  //Initializing circuit components
+  adder add;
+  shifter shift;
+  comparator comp;
+  boolean bool;
+  
+  
+  always {
+  
+    /*Initializing the value of all circuit components to zero*/
+    add.a = 0;
+    add.b = 0;
+    add.alufn = 0;
+    
+    alu_result = 0;
+    z = 0;
+    v = 0;
+    n = 0;
+    
+    shift.a = 0;
+    shift.b = 0;
+    shift.alufn = 0;
+    
+    comp.alufn = 0;
+    comp.v = 0;
+    comp.z = 0;
+    comp.n = 0;
+    
+    bool.a = 0;
+    bool.b = 0;
+    bool.alufn = 0;
+    
+    //Case statement that only cares about the 2 most significant bits, here we assign to each component of the ALU
+    case(alufn[5:4]) {
+      2b00: 
+      
+        //Adder
+        add.a = a;
+        add.b = b;
+        add.alufn = alufn[5:0];
+        
+        alu_result = add.s;
+        z = add.z;
+        v = add.v;
+        n = add.n;
+        
+      2b01:
+      
+        //Boolean specific logic
+        bool.a = a;
+        bool.b = b;
+        bool.alufn = alufn[5:0];
+        
+        alu_result = bool.bool;
+        
+        
+      2b10: 
+      
+        //Shifter specific logic
+        shift.a = a;
+        shift.b = b;
+        shift.alufn = alufn[5:0];
+        
+        alu_result = shift.shift;
+        
+      2b11:
+      
+        //Adder specific logic   
+        add.a = a;
+        add.b = b;
+        add.alufn = alufn[5:0];
+       
+        alu_result = add.s;
+        z = add.z;
+        v = add.v;
+        n = add.n;
+        
+        //comparator specific logic
+        comp.z = add.z;
+        comp.v = add.v;
+        comp.n = add.n;
+        comp.alufn = alufn[5:0];
+        alu_result = comp.comp;
+        
+      
+    }
+    
+    /*incrementing both the counters for each A and B, as you can see, one counter is updated by 2,
+    so that it doesn't necessarily display all similar cases*/
+  }
+}
