@@ -8,9 +8,14 @@ module mojo_top (
     input avr_tx,           // AVR TX (FPGA RX)
     input avr_rx_busy,       // AVR RX buffer full
     input io_dip[4],
-    output a,
-    output b,
-    output c,
+    output rand_number[4],
+    output output_digit_less[4],
+    output output_digit_high[4],
+    output operator[9],
+    input switch_i,
+    input switch_j,
+    input enter,
+    input reset,
     output io_led[19] //Assign LEDs as 5,4 -> operator LEDs, 3-0 -> RNG LEDs
  
   ) {
@@ -18,6 +23,7 @@ module mojo_top (
   sig rst;                  // reset signal
   dff number_sequence[4][4](.clk(clk), .rst(rst));
   dff operator_sequence[2][2](.clk(clk), .rst(rst));
+  dff game_over[2](.clk(clk),.rst(rst));
  
   dff current_num[12](.clk(clk), .rst(rst));
   dff i[2](.clk(clk), .rst(rst));
@@ -44,22 +50,23 @@ module mojo_top (
   }
  
   always {
-  
-    a = 1;
-    b = 1;
-    c = 1;
  
+    output_digit_high = 0;
+    output_digit_less = 0;
+   
     io_led[18:0] = 0 ;
  
     reset_cond.in = ~rst_n; // input raw inverted reset signal
     rst = reset_cond.out;   // conditioned reset
    
     //Check if reset signal has been asserted, basiscally, at this step, the game is reset
-    if (io_dip[0] && !reset_condition.q) {
+    if (reset && !reset_condition.q) {
+   
    
       io_led[16] = 1;
       //Reset game, set current number to random 0-9, assign new numbers and operators to the user
       current_num.d = pn_gen.num[3:0];
+      game_over.d = 0;
      
       reset_condition.d = 1;
      
@@ -103,7 +110,7 @@ module mojo_top (
         operator_sequence.d[1] = pn_gen6.num - (pn_gen6.num/4)*4;
       }
        
-    } else if (!io_dip[0] && reset_condition.q) {
+    } else if (!reset && reset_condition.q) {
    
       io_led[16] = 0;
       reset_condition.d = 0;
@@ -111,7 +118,7 @@ module mojo_top (
     }
    
     //Check for change in outputed random numbers
-    if (io_dip[1] && !change_i_condition.q) {
+    if (switch_i && !change_i_condition.q) {
    
        io_led[17] = 1;
    
@@ -123,7 +130,7 @@ module mojo_top (
      
       change_i_condition.d = 1;
      
-    } else if (!io_dip[1] && change_i_condition.q) {
+    } else if (!switch_i && change_i_condition.q) {
      
       io_led[17] = 0;
       change_i_condition.d = 0;
@@ -131,7 +138,7 @@ module mojo_top (
     }
    
     //Check for change in assigned operators
-    if (io_dip[2] && !change_j_condition.q) {
+    if (switch_j && !change_j_condition.q) {
    
       if (j.q == 1) {
         j.d = 0;
@@ -141,12 +148,12 @@ module mojo_top (
      
       change_j_condition.d = 1;
      
-    } else if (!io_dip[2] && change_j_condition.q) {
+    } else if (!switch_j && change_j_condition.q) {
       change_j_condition.d = 0;
     }
    
     //User has hit enter button, calculate the new current number and check accordingly
-    if (io_dip[3] && !enter_condition.q) {
+    if (enter && !enter_condition.q) {
    
       io_led[18] = 1;
    
@@ -206,7 +213,7 @@ module mojo_top (
      
       enter_condition.d = 1;
      
-    } else if (!io_dip[3] && enter_condition.q) {
+    } else if (!enter && enter_condition.q) {
    
       io_led[18] = 0;
       enter_condition.d = 0;
@@ -215,20 +222,94 @@ module mojo_top (
    
     //Output for number_sequence
     io_led[3:0] = number_sequence.q[i.q];
+    rand_number = number_sequence.q[i.q];
     //output for operator_sequence
     io_led[7:6] = operator_sequence.q[j.q];
+   
+    //Manually hard coding some LED sorcery
+    case(operator_sequence.q[j.q]) {
+      2b00:
+        operator[0] = 0;
+        operator[1] = 1;
+        operator[2] = 0;
+       
+        operator[5:3] = 1;
+       
+        operator[6] = 0;
+        operator[7] = 1;
+        operator[8] = 0;
+       
+      2b01:
+        operator[2:0] = 0;
+       
+        operator[5:3] = 1;
+       
+        operator[8:6] = 0;
+       
+      2b10:
+        operator[0] = 1;
+        operator[1] = 0;
+        operator[2] = 1;
+       
+        operator[3] = 0;
+        operator[4] = 1;
+        operator[5] = 0;
+       
+        operator[6] = 1;
+        operator[7] = 0;
+        operator[8] = 1;
+       
+      2b11:
+        operator[1:0] = 0;
+        operator[2] = 1;
+       
+        operator[3] = 0;
+        operator[4] = 1;
+        operator[5] = 0;
+       
+        operator[6] = 1;
+        operator[8:7] = 0;
+       
+      default:
+        operator[8:0] = 0;    
+    }
     //Output for current_num
     io_led[15:10] = current_num.q;
+    output_digit_high = current_num.q/10;
+   
+    if (game_over.q != 0) {
+   
+      if (current_num.q < 10 && !game_over.q) {
+        output_digit_less = current_num.q;
+      } else if (current_num.q >=10 && !game_over.q) {
+        output_digit_less = current_num.q - (current_num.q/10)*10;
+      }
+     
+    } else if (game_over.q == 1) {
+      //When game over = 1, its a win
+      output_digit_less = 0;
+      output_digit_high = 0;
+      operator[8:0] = 1;
+     
+    } else if (game_over.q == 2) {
+      //When game over = 2, game lost
+      output_digit_less = 4;
+      output_digit_high = 6;
+      operator[8:0] = 0;
+     
+    }
    
     io_led[18:16] = 0;
    
     if (current_num.q > 63) {
           io_led[9] = 1; //loss
           io_led[8] = 0;
+          game_over.d = 2;
           //Write code that resets the game
      } else if (current_num.q <= 0) {
           io_led[8] = 1; //Win
           io_led[9] = 0;
+          game_over.d = 1;
           //Write code that resets the game
      }
    
