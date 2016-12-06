@@ -8,6 +8,9 @@ module mojo_top (
     input avr_tx,           // AVR TX (FPGA RX)
     input avr_rx_busy,       // AVR RX buffer full
     input io_dip[4],
+    output a,
+    output b,
+    output c,
     output io_led[19] //Assign LEDs as 5,4 -> operator LEDs, 3-0 -> RNG LEDs
  
   ) {
@@ -41,6 +44,10 @@ module mojo_top (
   }
  
   always {
+  
+    a = 1;
+    b = 1;
+    c = 1;
  
     io_led[18:0] = 0 ;
  
