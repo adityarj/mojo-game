@@ -32,6 +32,8 @@ module mojo_top (
   dff change_i_condition(.clk(clk), .rst(rst));
   dff change_j_condition(.clk(clk), .rst(rst));
   dff enter_condition(.clk(clk), .rst(rst));
+  
+  
  
   alu alu;
  
@@ -39,7 +41,14 @@ module mojo_top (
   .clk(clk) {
     // The reset conditioner is used to synchronize the reset signal to the FPGA
     // clock. This ensures the entire FPGA comes out of reset at the same time.
-    reset_conditioner reset_cond;
+    
+    reset_conditioner reset_cond; 
+    //For debouncing
+    button_conditioner reset_button; 
+    button_conditioner i_button;
+    button_conditioner j_button;
+    button_conditioner enter_button;
+    
     .rst(rst) {
       pn_gen pn_gen;
       pn_gen pn_gen2;
@@ -55,6 +64,11 @@ module mojo_top (
  
     output_digit_high = 0;
     output_digit_less = 0;
+    
+    reset_button.in = reset;
+    i_button.in = switch_i;
+    j_button.in = switch_j;
+    enter_button.in = enter;
    
     io_led[18:0] = 0 ;
     alu.a = 0;
@@ -65,7 +79,7 @@ module mojo_top (
     rst = reset_cond.out;   // conditioned reset
    
     //Check if reset signal has been asserted, basiscally, at this step, the game is reset
-    if (reset && !reset_condition.q) {
+    if (reset_button.out && !reset_condition.q) {
    
    
       io_led[16] = 1;
@@ -115,7 +129,7 @@ module mojo_top (
         operator_sequence.d[1] = pn_gen6.num - (pn_gen6.num/4)*4;
       }
        
-    } else if (!reset && reset_condition.q) {
+    } else if (!reset_button.out && reset_condition.q) {
    
       io_led[16] = 0;
       reset_condition.d = 0;
@@ -123,7 +137,7 @@ module mojo_top (
     }
    
     //Check for change in outputed random numbers
-    if (switch_i && !change_i_condition.q) {
+    if (i_button.out && !change_i_condition.q) {
    
        io_led[17] = 1;
    
@@ -135,7 +149,7 @@ module mojo_top (
      
       change_i_condition.d = 1;
      
-    } else if (!switch_i && change_i_condition.q) {
+    } else if (!i_button.out && change_i_condition.q) {
      
       io_led[17] = 0;
       change_i_condition.d = 0;
@@ -143,7 +157,7 @@ module mojo_top (
     }
    
     //Check for change in assigned operators
-    if (switch_j && !change_j_condition.q) {
+    if (j_button.out && !change_j_condition.q) {
    
       if (j.q == 1) {
         j.d = 0;
@@ -153,12 +167,12 @@ module mojo_top (
      
       change_j_condition.d = 1;
      
-    } else if (!switch_j && change_j_condition.q) {
+    } else if (!j_button.out && change_j_condition.q) {
       change_j_condition.d = 0;
     }
    
     //User has hit enter button, calculate the new current number and check accordingly
-    if (enter && !enter_condition.q) {
+    if (enter_button.out && !enter_condition.q) {
    
       io_led[18] = 1;
      
@@ -224,7 +238,7 @@ module mojo_top (
      
       enter_condition.d = 1;
      
-    } else if (!enter && enter_condition.q) {
+    } else if (!enter_button.out && enter_condition.q) {
    
       io_led[18] = 0;
       enter_condition.d = 0;
