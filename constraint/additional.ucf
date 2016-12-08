@@ -1,29 +1,29 @@
-NET "rand_number<0>" LOC = P74 | IOSTANDARD = LVTTL;
-NET "rand_number<1>" LOC = P75 | IOSTANDARD = LVTTL;
-NET "rand_number<2>" LOC = P78 | IOSTANDARD = LVTTL;
-NET "rand_number<3>" LOC = P79 | IOSTANDARD = LVTTL;
+NET "rand_number<0>" LOC = P57 | IOSTANDARD = LVTTL;
+NET "rand_number<1>" LOC = P58 | IOSTANDARD = LVTTL;
+NET "rand_number<2>" LOC = P66 | IOSTANDARD = LVTTL;
+NET "rand_number<3>" LOC = P67 | IOSTANDARD = LVTTL;
 
-NET "output_digit_less<0>" LOC = P92 | IOSTANDARD = LVTTL;
-NET "output_digit_less<1>" LOC = P93 | IOSTANDARD = LVTTL;
-NET "output_digit_less<2>" LOC = P94 | IOSTANDARD = LVTTL;
-NET "output_digit_less<3>" LOC = P95 | IOSTANDARD = LVTTL;
+NET "output_digit_less<0>" LOC = P78 | IOSTANDARD = LVTTL;
+NET "output_digit_less<1>" LOC = P79 | IOSTANDARD = LVTTL;
+NET "output_digit_less<2>" LOC = P80 | IOSTANDARD = LVTTL;
+NET "output_digit_less<3>" LOC = P81 | IOSTANDARD = LVTTL;
 
-NET "output_digit_high<0>" LOC = P104 | IOSTANDARD = LVTTL;
-NET "output_digit_high<1>" LOC = P105 | IOSTANDARD = LVTTL;
-NET "output_digit_high<2>" LOC = P111 | IOSTANDARD = LVTTL;
-NET "output_digit_high<3>" LOC = P112 | IOSTANDARD = LVTTL;
+NET "output_digit_high<0>" LOC = P84 | IOSTANDARD = LVTTL;
+NET "output_digit_high<1>" LOC = P85 | IOSTANDARD = LVTTL;
+NET "output_digit_high<2>" LOC = P87 | IOSTANDARD = LVTTL;
+NET "output_digit_high<3>" LOC = P88 | IOSTANDARD = LVTTL;
 
-NET "operator<0>" LOC = P50 | IOSTANDARD = LVTTL;
-NET "operator<1>" LOC = P51 | IOSTANDARD = LVTTL;
-NET "operator<2>" LOC = P40 | IOSTANDARD = LVTTL;
-NET "operator<3>" LOC = P41 | IOSTANDARD = LVTTL;
-NET "operator<4>" LOC = P34 | IOSTANDARD = LVTTL;
-NET "operator<5>" LOC = P35 | IOSTANDARD = LVTTL;
-NET "operator<6>" LOC = P32 | IOSTANDARD = LVTTL;
-NET "operator<7>" LOC = P33 | IOSTANDARD = LVTTL;
-NET "operator<8>" LOC = P29 | IOSTANDARD = LVTTL;
+NET "operator<0>" LOC = P97 | IOSTANDARD = LVTTL;
+NET "operator<1>" LOC = P98 | IOSTANDARD = LVTTL;
+NET "operator<2>" LOC = P99 | IOSTANDARD = LVTTL;
+NET "operator<3>" LOC = P100 | IOSTANDARD = LVTTL;
+NET "operator<4>" LOC = P101 | IOSTANDARD = LVTTL;
+NET "operator<5>" LOC = P102 | IOSTANDARD = LVTTL;
+NET "operator<6>" LOC = P104 | IOSTANDARD = LVTTL;
+NET "operator<7>" LOC = P105 | IOSTANDARD = LVTTL;
+NET "operator<8>" LOC = P111 | IOSTANDARD = LVTTL;
 
-NET "switch_i" LOC = P16 | IOSTANDARD = LVTTL;
-NET "switch_j" LOC = P17 | IOSTANDARD = LVTTL;
-NET "enter" LOC = P15 | IOSTANDARD = LVTTL;
-NET "reset" LOC = P14 | IOSTANDARD = LVTTL;
+NET "switch_i" LOC = P12 | IOSTANDARD = LVTTL;
+NET "switch_j" LOC = P24 | IOSTANDARD = LVTTL;
+NET "enter" LOC = P2 | IOSTANDARD = LVTTL;
+NET "reset" LOC = P35 | IOSTANDARD = LVTTL;

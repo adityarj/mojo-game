@@ -3,7 +3,7 @@ module comparator (
   input z,
   input v,
   input n,
-  output comp[8]
+  output comp[6]
   ) {
 
   always { 
