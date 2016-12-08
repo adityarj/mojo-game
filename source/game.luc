@@ -8,7 +8,8 @@ module game (
     input switch_i,
     input switch_j,
     input enter,
-    input reset
+    input reset,
+    output test_pin
     //output io_led[19]
   ) {
   sig rst;                  // reset signal
@@ -24,6 +25,7 @@ module game (
   dff change_j_condition(.clk(clk), .rst(rst));
   dff enter_condition(.clk(clk), .rst(rst));
   dff v(.clk(clk), .rst(rst));
+  dff n(.clk(clk), .rst(rst));
   
   alu alu;
   alu alu2;
@@ -86,7 +88,7 @@ module game (
       current_num.d = pn_gen.num[3:0];
       //Only way to restart game
       game_over.d = 0;
-     
+      v.d = 0;
       reset_condition.d = 1;
      
       //Below are the four inputs that are going to somehow magically generate a number from 0-9
@@ -205,6 +207,7 @@ module game (
      
       alu.a = current_num.q;
       alu.b = number_sequence.q[i.q];
+      
    
       case(operator_sequence.q[j.q]) {
         2b00: //Performs + operation
@@ -222,6 +225,7 @@ module game (
      
       current_num.d = alu.alu_result;
       v.d = alu.v;
+      n.d = alu.n;
      
      
       //Below are the four inputs that are going to somehow magically generate a number from 0-9
@@ -371,15 +375,16 @@ module game (
     alu2.b = 0;
     alu2.alufn = 6b110111;
    
+    test_pin = v.q;
     
-    if (v.q == 1) {
+    if (v.q == 1 && n.q != 1) {
           //io_led[9] = 1; //loss
           //io_led[8] = 0;
           game_over.d = 2;
           //Write code that resets the game
      } 
     
-     if (alu2.alu_result[0]) {
+     else if (alu2.alu_result[0]) {
           //io_led[8] = 1; //Win
           //io_led[9] = 0;
           game_over.d = 1;

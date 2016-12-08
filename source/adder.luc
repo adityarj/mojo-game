@@ -1,14 +1,14 @@
 module adder (
-    input a[6],
-    input b[6],
-    output s[6],
+    input a[7],
+    input b[7],
+    output s[7],
     input alufn [6],
     output v,
     output n,
     output z
   ) {
   
-  sig sum[9]; //9 bit to account for overflow and prevent exceptions being thrown for no reason
+  sig sum[8]; //9 bit to account for overflow and prevent exceptions being thrown for no reason
   
   always {
   
@@ -36,9 +36,9 @@ module adder (
     }
     
     //Z,V and N for the adder.
-    n = sum[5];
-    v = ( a[5] & b[5] & (~sum[5])) | 
-          ((~a[5])&(~b[5])&sum[5]);
+    n = sum[7];
+    v = ( a[6] & b[6] & (~sum[7])) | 
+          ((~a[6])&(~b[6])&sum[7]);
     z = ~|sum;
  }
 }

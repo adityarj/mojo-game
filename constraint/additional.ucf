@@ -27,3 +27,5 @@ NET "switch_i" LOC = P12 | IOSTANDARD = LVTTL;
 NET "switch_j" LOC = P24 | IOSTANDARD = LVTTL;
 NET "enter" LOC = P2 | IOSTANDARD = LVTTL;
 NET "reset" LOC = P35 | IOSTANDARD = LVTTL;
+
+NET "test_pin" LOC = P51 | IOSTANDARD = LVTTL;
