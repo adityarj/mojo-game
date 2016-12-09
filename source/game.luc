@@ -13,6 +13,8 @@ module game (
     //output io_led[19]
   ) {
   sig rst;                  // reset signal
+  sig rand[9];
+  sig temp;
   dff number_sequence[4][4](.clk(clk), .rst(rst));
   dff operator_sequence[2][2](.clk(clk), .rst(rst));
   dff game_over[2](.clk(clk),.rst(rst));
@@ -61,6 +63,16 @@ module game (
   }
 
   always {
+    rand[0] = 1;
+    rand[1] = 2;
+    rand[2] = 3;
+    rand[3] = 4;
+    rand[4] = 5;
+    rand[5] = 6;
+    rand[6] = 7;
+    rand[7] = 8;
+    rand[8] = 9;
+    
     output_digit_high = 0;
     output_digit_less = 0;
     
@@ -117,19 +129,23 @@ module game (
       //Below are the four inputs that are going to somehow magically generate a number from 0-9
       //We mod these inputs by 10 to make sure they are always from 0-9
       mod_num1.a = pn_gen.num;
-      mod_num1.b = 10;
-      number_sequence.d[0] = mod_num1.out;
+      mod_num1.b = 9;
+      number_sequence.d[0] = rand[mod_num1.out];
+      
+      temp = rand[8];
+      rand[8] = rand[mod_num1.out];
+      rand[mod_num1.out] = temp;
       
       mod_num2.a = pn_gen2.num;
-      mod_num2.b = 10;
-      number_sequence.d[1] = mod_num2.out;
+      mod_num2.b = 8;
+      number_sequence.d[1] = rand[mod_num2.out];
      
       mod_num3.a = pn_gen3.num;
-      mod_num3.b = 10;
+      mod_num3.b = 7;
       number_sequence.d[2] = mod_num3.out;
      
       mod_num4.a = pn_gen4.num;
-      mod_num4.b = 10;
+      mod_num4.b = 6;
       number_sequence.d[3] = mod_num4.out;
      
       //Below two numbers magically select a sign
