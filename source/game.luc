@@ -70,7 +70,6 @@ module game (
     enter_button.in = enter;
     edge_detector_enter.in = enter_button.out;
    
-    //io_led[18:0] = 0 ;
     alu.a = 0;
     alu.b = 0;
     alu.alufn = 0;
@@ -81,11 +80,11 @@ module game (
     //Check if reset signal has been asserted, basiscally, at this step, the game is reset
     if (edge_detector_reset.out) {
    
-   
-      //io_led[16] = 1;
-      //io_led[18] = 1;
       //Reset game, set current number to random 0-9, assign new numbers and operators to the user
       current_num.d = pn_gen.num[3:0];
+      if (current_num.q == 0) {
+        current_num.d = 1 + (pn_gen2.num - pn_gen3.num);
+      }
       //Only way to restart game
       game_over.d = 0;
       v.d = 0;
@@ -98,17 +97,17 @@ module game (
       } else {
         number_sequence.d[0] = pn_gen.num[3:0] - 10;
         //Assigning a non zero value if zero
-        if (number_sequence.q[0] <= 0) {
+        if (number_sequence.q[0] == 0) {
           number_sequence.d[0] = pn_gen.num - 1;
         }
         
       }
      
-      if (pn_gen2.num[3:0] < 10) {
-        number_sequence.d[1] = pn_gen2.num[3:0];
+      if (pn_gen.num[5:2] < 10) {
+        number_sequence.d[1] = pn_gen.num[5:2];
       } else {
-        number_sequence.d[1] = pn_gen2.num[3:0] - 10;
-        if (number_sequence.q[1] <= 0) {
+        number_sequence.d[1] = pn_gen.num[5:2] - 10;
+        if (number_sequence.q[1] == 0) {
           number_sequence.d[1] = pn_gen2.num - 1;
         }
         if (number_sequence.q[1] == number_sequence.q[0]) {
@@ -116,27 +115,27 @@ module game (
         }
       }
      
-      if (pn_gen3.num[3:0] < 10) {
-        number_sequence.d[2] = pn_gen3.num[3:0];
+      if (pn_gen2.num[4:1] < 10) {
+        number_sequence.d[2] = pn_gen2.num[4:1];
       } else {
-        number_sequence.d[2] = pn_gen3.num[3:0] - 10;
-        if (number_sequence.q[2] <= 0) {
-          number_sequence.d[2] = pn_gen3.num - 1;
+        number_sequence.d[2] = pn_gen2.num[4:1] - 10;
+        if (number_sequence.q[2] == 0) {
+          number_sequence.d[2] = pn_gen2.num - 1;
         }
-        if (number_sequence.q[2] == number_sequence.q[1]) {
-          number_sequence.d[2] = number_sequence.q[1] >> 1;
+        if (number_sequence.q[2] == number_sequence.q[1] | number_sequence.q[2] == number_sequence.q[0]) {
+          number_sequence.d[2] = number_sequence.q[1] + number_sequence.q[0];
         }
       }
      
-      if (pn_gen4.num[3:0] < 10) {
-        number_sequence.d[3] = pn_gen4.num[3:0];
+      if (pn_gen2.num[7:4] < 10) {
+        number_sequence.d[3] = pn_gen2.num[7:4];
       } else {
-        number_sequence.d[3] = pn_gen4.num[3:0] - 10;
+        number_sequence.d[3] = pn_gen2.num[7:4] - 10;
         if (number_sequence.q[3] <= 0) {
-          number_sequence.d[3] = pn_gen4.num - 1;
+          number_sequence.d[3] = pn_gen2.num - 1;
         }
-        if (number_sequence.q[3] == number_sequence.q[2]) {
-          number_sequence.d[3] = number_sequence.q[2] >> 1;
+        if (number_sequence.q[3] == number_sequence.q[2] | number_sequence.q[3] == number_sequence.q[1] | number_sequence.q[3] == number_sequence.q[0]) {
+          number_sequence.d[3] = number_sequence.q[2] + number_sequence.q[3] - number_sequence.q[1];
         }
       }
      
@@ -154,21 +153,13 @@ module game (
         operator_sequence.d[1] = pn_gen6.num - (pn_gen6.num/4)*4;
         //Making sure not to have two of the same signs
         if (operator_sequence.q[1] == operator_sequence.q[0]) {
-          operator_sequence.d[1] = operator_sequence.q[0] + 1;
+          operator_sequence.d[1] = operator_sequence.q[1] + 1;
         }
       }
-       
-    } else if (!edge_detector_reset.out && reset_condition.q) {
-   
-      //io_led[16] = 0;
-      reset_condition.d = 0;
-     
-    }
+    } 
    
     //Check for change in outputed random numbers
     if (edge_detector_i.out) {
-   
-       //io_led[17] = 1;
    
       if (i.q == 3) {
         i.d = 0;
@@ -179,10 +170,7 @@ module game (
       change_i_condition.d = 1;
      
     } else if (!i_button.out && change_i_condition.q) {
-     
-      //io_led[17] = 0;
       change_i_condition.d = 0;
-     
     }
    
     //Check for change in assigned operators
@@ -202,13 +190,10 @@ module game (
    
     //User has hit enter button, calculate the new current number and check accordingly
     if (edge_detector_enter.out) {
-   
-      //io_led[18] = 1;
      
       alu.a = current_num.q;
       alu.b = number_sequence.q[i.q];
       
-   
       case(operator_sequence.q[j.q]) {
         2b00: //Performs + operation
           alu.alufn = 6b000000;
@@ -235,17 +220,17 @@ module game (
       } else {
         number_sequence.d[0] = pn_gen.num[3:0] - 10;
         //Assigning a non zero value if zero
-        if (number_sequence.q[0] <= 0) {
+        if (number_sequence.q[0] == 0) {
           number_sequence.d[0] = pn_gen.num - 1;
         }
         
       }
      
-      if (pn_gen2.num[3:0] < 10) {
-        number_sequence.d[1] = pn_gen2.num[3:0];
+      if (pn_gen.num[5:2] < 10) {
+        number_sequence.d[1] = pn_gen.num[5:2];
       } else {
-        number_sequence.d[1] = pn_gen2.num[3:0] - 10;
-        if (number_sequence.q[1] <= 0) {
+        number_sequence.d[1] = pn_gen.num[5:2] - 10;
+        if (number_sequence.q[1] == 0) {
           number_sequence.d[1] = pn_gen2.num - 1;
         }
         if (number_sequence.q[1] == number_sequence.q[0]) {
@@ -253,27 +238,27 @@ module game (
         }
       }
      
-      if (pn_gen3.num[3:0] < 10) {
-        number_sequence.d[2] = pn_gen3.num[3:0];
+      if (pn_gen2.num[4:1] < 10) {
+        number_sequence.d[2] = pn_gen2.num[4:1];
       } else {
-        number_sequence.d[2] = pn_gen3.num[3:0] - 10;
-        if (number_sequence.q[2] <= 0) {
-          number_sequence.d[2] = pn_gen3.num - 1;
+        number_sequence.d[2] = pn_gen2.num[4:1] - 10;
+        if (number_sequence.q[2] == 0) {
+          number_sequence.d[2] = pn_gen2.num - 1;
         }
-        if (number_sequence.q[2] == number_sequence.q[1]) {
-          number_sequence.d[2] = number_sequence.q[1] >> 1;
+        if (number_sequence.q[2] == number_sequence.q[1] | number_sequence.q[2] == number_sequence.q[0]) {
+          number_sequence.d[2] = number_sequence.q[1] + number_sequence.q[0];
         }
       }
      
-      if (pn_gen4.num[3:0] < 10) {
-        number_sequence.d[3] = pn_gen4.num[3:0];
+      if (pn_gen2.num[7:4] < 10) {
+        number_sequence.d[3] = pn_gen2.num[7:4];
       } else {
-        number_sequence.d[3] = pn_gen4.num[3:0] - 10;
+        number_sequence.d[3] = pn_gen2.num[7:4] - 10;
         if (number_sequence.q[3] <= 0) {
-          number_sequence.d[3] = pn_gen4.num - 1;
+          number_sequence.d[3] = pn_gen2.num - 1;
         }
-        if (number_sequence.q[3] == number_sequence.q[2]) {
-          number_sequence.d[3] = number_sequence.q[2] >> 1;
+        if (number_sequence.q[3] == number_sequence.q[2] | number_sequence.q[3] == number_sequence.q[1] | number_sequence.q[3] == number_sequence.q[0]) {
+          number_sequence.d[3] = number_sequence.q[2] + number_sequence.q[3] - number_sequence.q[1];
         }
       }
      
@@ -297,102 +282,46 @@ module game (
      
       enter_condition.d = 1;
      
-    } else if (!enter_button.out && enter_condition.q) {
-   
-      //io_led[18] = 0;
-      enter_condition.d = 0;
+    } 
      
-    }
-   
-    //Output for number_sequence
-    //io_led[3:0] = number_sequence.q[i.q];
-    rand_number = number_sequence.q[i.q];
-    //output for operator_sequence
-    //io_led[7:6] = operator_sequence.q[j.q];
+    rand_number = number_sequence.q[i.q];  
    
     //Manually hard coding some LED sorcery
     case(operator_sequence.q[j.q]) {
       2b00:
-        operator[0] = 0;
-        operator[1] = 1;
-        operator[2] = 0;
-       
-        operator[5] = 1;
-        operator[4] = 1;
-        operator[3] = 1;
-       
-        operator[6] = 0;
-        operator[7] = 1;
-        operator[8] = 0;
+        operator = 9b010111010;
        
       2b01:
-        operator[2] = 0;
-        operator[1] = 0;
-        operator[0] = 0;
-       
-        operator[5] = 1;
-        operator[4] = 1;
-        operator[3] = 1;
-       
-        operator[8] = 0;
-        operator[7] = 0;
-        operator[6] = 0;
+        operator = 9b000111000;
        
       2b10:
-        operator[0] = 1;
-        operator[1] = 0;
-        operator[2] = 1;
-       
-        operator[3] = 0;
-        operator[4] = 1;
-        operator[5] = 0;
-       
-        operator[6] = 1;
-        operator[7] = 0;
-        operator[8] = 1;
+        operator = 9b101010101;
        
       2b11:
-        operator[1] = 0;
-        operator[0] = 0;
-        operator[2] = 1;
-       
-        operator[3] = 0;
-        operator[4] = 1;
-        operator[5] = 0;
-       
-        operator[6] = 1;
-        operator[8] = 0;
-        operator[7] = 0;
-       
+        operator = 9b001010100;
+
       default:
         operator[8:0] = 0;    
     }
     //Output for current_num
-    //io_led[15:10] = current_num.q;
     output_digit_high = current_num.q/10;
     
     alu2.a = current_num.q;
     alu2.b = 0;
     alu2.alufn = 6b110111;
    
-    test_pin = v.q;
+    test_pin = 0;
     
-    if (v.q == 1 && n.q != 1) {
-          //io_led[9] = 1; //loss
-          //io_led[8] = 0;
+    if (v.q == 1) {
           game_over.d = 2;
-          //Write code that resets the game
      } 
     
-     else if (alu2.alu_result[0]) {
-          //io_led[8] = 1; //Win
-          //io_led[9] = 0;
+     else if (alu2.alu_result[0] | n.q == 1) {
           game_over.d = 1;
-          //Write code that resets the game
      }
    
     if (game_over.q == 0) {
-   
+          
       if (current_num.q < 10) {
         output_digit_less = current_num.q;
       } else if (current_num.q >=10) {
@@ -400,20 +329,13 @@ module game (
       }
      
     } else if (game_over.q == 1) {
+    
       //When game over = 1, its a win
       output_digit_less = 0;
       output_digit_high = 0;
       
       //Set all LEDs to 1
-      operator[8] = 1;
-      operator[7] = 1;
-      operator[6] = 1;
-      operator[5] = 1;
-      operator[4] = 1;
-      operator[3] = 1;
-      operator[2] = 1;
-      operator[1] = 1;
-      operator[0] = 1;
+      operator = 9b111111111;
      
     } else if (game_over.q == 2) {
       //When game over = 2, game lost
@@ -421,15 +343,7 @@ module game (
       output_digit_high = 6;
       
       //Set all LEDs to 0
-      operator[8] = 0;
-      operator[7] = 0;
-      operator[6] = 0;
-      operator[5] = 0; 
-      operator[4] = 0;
-      operator[3] = 0;
-      operator[2] = 0;
-      operator[1] = 0;
-      operator[0] = 0;
+      operator = 9b000000000;
      
     }
     
