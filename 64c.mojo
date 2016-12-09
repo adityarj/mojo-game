@@ -6,6 +6,7 @@
     <src>alu.luc</src>
     <src>multiplier.luc</src>
     <src>shifter.luc</src>
+    <src>modulus.luc</src>
     <src>adder.luc</src>
     <src>button_conditioner.luc</src>
     <src top="true">mojo_top.luc</src>

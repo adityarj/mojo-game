@@ -29,6 +29,12 @@ module game (
   
   alu alu;
   alu alu2;
+  modulus mod_num1;
+  modulus mod_num2;
+  modulus mod_num3;
+  modulus mod_num4;
+  modulus mod_num5;
+  modulus mod_num6;
   
   .clk(clk) {
     reset_conditioner reset_cond; 
@@ -73,7 +79,25 @@ module game (
     alu.a = 0;
     alu.b = 0;
     alu.alufn = 0;
- 
+    
+    mod_num1.a = 0;
+    mod_num1.b = 0;
+    
+    mod_num2.a = 0;
+    mod_num2.b = 0;
+    
+    mod_num3.a = 0;
+    mod_num3.b = 0;
+    
+    mod_num4.a = 0;
+    mod_num4.b = 0;
+    
+    mod_num5.a = 0; 
+    mod_num5.b = 0;
+    
+    mod_num6.a = 0;
+    mod_num6.b = 0;
+    
     reset_cond.in = ~rst_n; // input raw inverted reset signal
     rst = reset_cond.out;   // conditioned reset
    
@@ -92,70 +116,31 @@ module game (
      
       //Below are the four inputs that are going to somehow magically generate a number from 0-9
       //We mod these inputs by 10 to make sure they are always from 0-9
-      if (pn_gen.num[3:0] < 10) {
-        number_sequence.d[0] = pn_gen.num[3:0];
-      } else {
-        number_sequence.d[0] = pn_gen.num[3:0] - 10;
-        //Assigning a non zero value if zero
-        if (number_sequence.q[0] == 0) {
-          number_sequence.d[0] = pn_gen.num - 1;
-        }
-        
-      }
+      mod_num1.a = pn_gen.num;
+      mod_num1.b = 10;
+      number_sequence.d[0] = mod_num1.out;
+      
+      mod_num2.a = pn_gen2.num;
+      mod_num2.b = 10;
+      number_sequence.d[1] = mod_num2.out;
      
-      if (pn_gen.num[5:2] < 10) {
-        number_sequence.d[1] = pn_gen.num[5:2];
-      } else {
-        number_sequence.d[1] = pn_gen.num[5:2] - 10;
-        if (number_sequence.q[1] == 0) {
-          number_sequence.d[1] = pn_gen2.num - 1;
-        }
-        if (number_sequence.q[1] == number_sequence.q[0]) {
-          number_sequence.d[1] = number_sequence.q[0] >> 1;
-        }
-      }
+      mod_num3.a = pn_gen3.num;
+      mod_num3.b = 10;
+      number_sequence.d[2] = mod_num3.out;
      
-      if (pn_gen2.num[4:1] < 10) {
-        number_sequence.d[2] = pn_gen2.num[4:1];
-      } else {
-        number_sequence.d[2] = pn_gen2.num[4:1] - 10;
-        if (number_sequence.q[2] == 0) {
-          number_sequence.d[2] = pn_gen2.num - 1;
-        }
-        if (number_sequence.q[2] == number_sequence.q[1] | number_sequence.q[2] == number_sequence.q[0]) {
-          number_sequence.d[2] = number_sequence.q[1] + number_sequence.q[0];
-        }
-      }
-     
-      if (pn_gen2.num[7:4] < 10) {
-        number_sequence.d[3] = pn_gen2.num[7:4];
-      } else {
-        number_sequence.d[3] = pn_gen2.num[7:4] - 10;
-        if (number_sequence.q[3] <= 0) {
-          number_sequence.d[3] = pn_gen2.num - 1;
-        }
-        if (number_sequence.q[3] == number_sequence.q[2] | number_sequence.q[3] == number_sequence.q[1] | number_sequence.q[3] == number_sequence.q[0]) {
-          number_sequence.d[3] = number_sequence.q[2] + number_sequence.q[3] - number_sequence.q[1];
-        }
-      }
+      mod_num4.a = pn_gen4.num;
+      mod_num4.b = 10;
+      number_sequence.d[3] = mod_num4.out;
      
       //Below two numbers magically select a sign
       //%ing them with 4
-      if (pn_gen5.num < 4) {
-        operator_sequence.d[0] = pn_gen5.num;
-      } else {
-        operator_sequence.d[0] = pn_gen5.num - (pn_gen5.num/4)*4;
-      }
-     
-      if (pn_gen6.num < 4) {
-        operator_sequence.d[1] = pn_gen6.num;
-      } else {
-        operator_sequence.d[1] = pn_gen6.num - (pn_gen6.num/4)*4;
-        //Making sure not to have two of the same signs
-        if (operator_sequence.q[1] == operator_sequence.q[0]) {
-          operator_sequence.d[1] = operator_sequence.q[1] + 1;
-        }
-      }
+      mod_num5.a = pn_gen5.num;
+      mod_num5.b = 4;
+      operator_sequence.d[0] = mod_num5.out;
+      
+      mod_num6.a = pn_gen6.num;
+      mod_num6.b = 4;
+      operator_sequence.d[1] = mod_num6.out;
     } 
    
     //Check for change in outputed random numbers
@@ -212,73 +197,33 @@ module game (
       v.d = alu.v;
       n.d = alu.n;
      
-     
-      //Below are the four inputs that are going to somehow magically generate a number from 0-9
+       //Below are the four inputs that are going to somehow magically generate a number from 0-9
       //We mod these inputs by 10 to make sure they are always from 0-9
-      if (pn_gen.num[3:0] < 10) {
-        number_sequence.d[0] = pn_gen.num[3:0];
-      } else {
-        number_sequence.d[0] = pn_gen.num[3:0] - 10;
-        //Assigning a non zero value if zero
-        if (number_sequence.q[0] == 0) {
-          number_sequence.d[0] = pn_gen.num - 1;
-        }
-        
-      }
+      mod_num1.a = pn_gen.num;
+      mod_num1.b = 10;
+      number_sequence.d[0] = mod_num1.out;
+      
+      mod_num2.a = pn_gen2.num;
+      mod_num2.b = 10;
+      number_sequence.d[1] = mod_num2.out;
      
-      if (pn_gen.num[5:2] < 10) {
-        number_sequence.d[1] = pn_gen.num[5:2];
-      } else {
-        number_sequence.d[1] = pn_gen.num[5:2] - 10;
-        if (number_sequence.q[1] == 0) {
-          number_sequence.d[1] = pn_gen2.num - 1;
-        }
-        if (number_sequence.q[1] == number_sequence.q[0]) {
-          number_sequence.d[1] = number_sequence.q[0] >> 1;
-        }
-      }
+      mod_num3.a = pn_gen3.num;
+      mod_num3.b = 10;
+      number_sequence.d[2] = mod_num3.out;
      
-      if (pn_gen2.num[4:1] < 10) {
-        number_sequence.d[2] = pn_gen2.num[4:1];
-      } else {
-        number_sequence.d[2] = pn_gen2.num[4:1] - 10;
-        if (number_sequence.q[2] == 0) {
-          number_sequence.d[2] = pn_gen2.num - 1;
-        }
-        if (number_sequence.q[2] == number_sequence.q[1] | number_sequence.q[2] == number_sequence.q[0]) {
-          number_sequence.d[2] = number_sequence.q[1] + number_sequence.q[0];
-        }
-      }
-     
-      if (pn_gen2.num[7:4] < 10) {
-        number_sequence.d[3] = pn_gen2.num[7:4];
-      } else {
-        number_sequence.d[3] = pn_gen2.num[7:4] - 10;
-        if (number_sequence.q[3] <= 0) {
-          number_sequence.d[3] = pn_gen2.num - 1;
-        }
-        if (number_sequence.q[3] == number_sequence.q[2] | number_sequence.q[3] == number_sequence.q[1] | number_sequence.q[3] == number_sequence.q[0]) {
-          number_sequence.d[3] = number_sequence.q[2] + number_sequence.q[3] - number_sequence.q[1];
-        }
-      }
+      mod_num4.a = pn_gen4.num;
+      mod_num4.b = 10;
+      number_sequence.d[3] = mod_num4.out;
      
       //Below two numbers magically select a sign
       //%ing them with 4
-      if (pn_gen5.num < 4) {
-        operator_sequence.d[0] = pn_gen5.num;
-      } else {
-        operator_sequence.d[0] = pn_gen5.num - (pn_gen5.num/4)*4;
-      }
-     
-      if (pn_gen6.num < 4) {
-        operator_sequence.d[1] = pn_gen6.num;
-      } else {
-        operator_sequence.d[1] = pn_gen6.num - (pn_gen6.num/4)*4;
-        //Making sure not to have two of the same signs
-        if (operator_sequence.q[1] == operator_sequence.q[0]) {
-          operator_sequence.d[1] = operator_sequence.q[0] + 1;
-        }
-      }
+      mod_num5.a = pn_gen5.num;
+      mod_num5.b = 4;
+      operator_sequence.d[0] = mod_num5.out;
+      
+      mod_num6.a = pn_gen6.num;
+      mod_num6.b = 4;
+      operator_sequence.d[1] = mod_num6.out;
      
       enter_condition.d = 1;
      

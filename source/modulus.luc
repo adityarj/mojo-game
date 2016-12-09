@@ -1,0 +1,14 @@
+module modulus (
+    input a[6],
+    input b[6],
+    output out[6]
+  ) {
+
+  always {
+    if (a < b) {
+      out = a;
+    } else {
+      out = a - (a/b)*b;
+    }
+  }
+}
