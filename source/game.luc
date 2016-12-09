@@ -14,6 +14,7 @@ module game (
   ) {
   sig rst;                  // reset signal
   sig rand[9];
+  sig sign_rand[4];
   sig temp;
   dff number_sequence[4][4](.clk(clk), .rst(rst));
   dff operator_sequence[2][2](.clk(clk), .rst(rst));
@@ -72,6 +73,11 @@ module game (
     rand[6] = 7;
     rand[7] = 8;
     rand[8] = 9;
+    
+    sign_rand[0] = 0;
+    sign_rand[1] = 1;
+    sign_rand[2] = 2;
+    sign_rand[3] = 3;
     
     output_digit_high = 0;
     output_digit_less = 0;
@@ -139,24 +145,37 @@ module game (
       mod_num2.a = pn_gen2.num;
       mod_num2.b = 8;
       number_sequence.d[1] = rand[mod_num2.out];
+      
+      temp = rand[7];
+      rand[7] = rand[mod_num2.out];
+      rand[mod_num2.out] = temp;
      
       mod_num3.a = pn_gen3.num;
       mod_num3.b = 7;
       number_sequence.d[2] = mod_num3.out;
-     
+      
+      temp = rand[6];
+      rand[6] = rand[mod_num3.out];
+      rand[mod_num3.out] = temp;
+      
       mod_num4.a = pn_gen4.num;
       mod_num4.b = 6;
       number_sequence.d[3] = mod_num4.out;
+      
      
       //Below two numbers magically select a sign
       //%ing them with 4
       mod_num5.a = pn_gen5.num;
       mod_num5.b = 4;
-      operator_sequence.d[0] = mod_num5.out;
+      operator_sequence.d[0] = sign_rand[mod_num5.out];
+      
+      temp = sign_rand[3];
+      sign_rand[3] = sign_rand[mod_num5.out];
+      sign_rand[mod_num5.out] = temp;
       
       mod_num6.a = pn_gen6.num;
-      mod_num6.b = 4;
-      operator_sequence.d[1] = mod_num6.out;
+      mod_num6.b = 3;
+      operator_sequence.d[1] = sign_rand[mod_num6.out];
     } 
    
     //Check for change in outputed random numbers
@@ -203,33 +222,49 @@ module game (
       v.d = alu.v;
       n.d = alu.n;
      
-       //Below are the four inputs that are going to somehow magically generate a number from 0-9
+      //Below are the four inputs that are going to somehow magically generate a number from 0-9
       //We mod these inputs by 10 to make sure they are always from 0-9
       mod_num1.a = pn_gen.num;
-      mod_num1.b = 10;
-      number_sequence.d[0] = mod_num1.out;
+      mod_num1.b = 9;
+      number_sequence.d[0] = rand[mod_num1.out];
+      
+      temp = rand[8];
+      rand[8] = rand[mod_num1.out];
+      rand[mod_num1.out] = temp;
       
       mod_num2.a = pn_gen2.num;
-      mod_num2.b = 10;
-      number_sequence.d[1] = mod_num2.out;
+      mod_num2.b = 8;
+      number_sequence.d[1] = rand[mod_num2.out];
+      
+      temp = rand[7];
+      rand[7] = rand[mod_num2.out];
+      rand[mod_num2.out] = temp;
      
       mod_num3.a = pn_gen3.num;
-      mod_num3.b = 10;
+      mod_num3.b = 7;
       number_sequence.d[2] = mod_num3.out;
-     
+      
+      temp = rand[6];
+      rand[6] = rand[mod_num3.out];
+      rand[mod_num3.out] = temp;
+      
       mod_num4.a = pn_gen4.num;
-      mod_num4.b = 10;
+      mod_num4.b = 6;
       number_sequence.d[3] = mod_num4.out;
      
       //Below two numbers magically select a sign
       //%ing them with 4
       mod_num5.a = pn_gen5.num;
       mod_num5.b = 4;
-      operator_sequence.d[0] = mod_num5.out;
+      operator_sequence.d[0] = sign_rand[mod_num5.out];
+      
+      temp = sign_rand[3];
+      sign_rand[3] = sign_rand[mod_num5.out];
+      sign_rand[mod_num5.out] = temp;
       
       mod_num6.a = pn_gen6.num;
-      mod_num6.b = 4;
-      operator_sequence.d[1] = mod_num6.out;
+      mod_num6.b = 3;
+      operator_sequence.d[1] = sign_rand[mod_num6.out];
      
       enter_condition.d = 1;
      
