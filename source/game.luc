@@ -151,12 +151,7 @@ module game (
       } else {
         i.d = i.q + 1;
       }
-     
-      change_i_condition.d = 1;
-     
-    } else if (!i_button.out && change_i_condition.q) {
-      change_i_condition.d = 0;
-    }
+    } 
    
     //Check for change in assigned operators
     if (edge_detector_j.out) {
@@ -166,12 +161,7 @@ module game (
       } else {
         j.d = 1;
       }
-     
-      change_j_condition.d = 1;
-     
-    } else if (!j_button.out && change_j_condition.q) {
-      change_j_condition.d = 0;
-    }
+    } 
    
     //User has hit enter button, calculate the new current number and check accordingly
     if (edge_detector_enter.out) {
