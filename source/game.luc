@@ -265,14 +265,12 @@ module game (
      
       //Below two numbers magically select a sign
       //%ing them with 4
-      mod_num5.a = pn_gen5.num;
-      mod_num5.b = 4;
-      operator_sequence.d[0] = sign_rand.q[mod_num5.out];
+      operator_sequence.d[0] = sign_rand.q[pn_gen5.num[1:0]];
       
       if (mod_num5.out != 3) {      
         temp2 = sign_rand.q[3];
-        sign_rand.d[3] = sign_rand.q[mod_num5.out];
-        sign_rand.d[mod_num5.out] = temp2;
+        sign_rand.d[3] = sign_rand.q[pn_gen5.num[1:0]];
+        sign_rand.d[pn_gen5.num[1:0]] = temp2;
       }
                               
       mod_num6.a = pn_gen6.num;

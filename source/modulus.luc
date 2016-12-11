@@ -1,14 +1,196 @@
 module modulus (
-    input a[6],
-    input b[6],
-    output out[6]
+    input a[4],
+    input b[4],
+    output out[4]
   ) {
 
   always {
-    if (a < b) {
-      out = a;
-    } else {
-      out = a - (a/b)*b;
+    case(b) {
+      4b1001: //9
+        case(a) {
+          0:
+            out = 0;
+          1:
+            out = 1;
+          2: 
+            out = 2;
+          3: 
+            out = 3;
+          4: 
+            out = 4;
+          5:
+            out = 5;
+          6:
+            out = 6;
+          7:
+            out = 7;
+          8:
+            out = 8;
+          9:
+            out = 0;   
+          10:
+            out = 1;
+          11:
+            out = 2;
+          12:
+            out = 3;    
+          13:
+            out = 4;
+          14:
+            out = 5;
+          15:
+            out = 6;   
+          default:
+            out = 0;                    
+        }
+     4b1000: //8
+        case(a) {
+          0:
+            out = 0;
+          1:
+            out = 1;
+          2: 
+            out = 2;
+          3: 
+            out = 3;
+          4: 
+            out = 4;
+          5:
+            out = 5;
+          6:
+            out = 6;
+          7:
+            out = 7;
+          8:
+            out = 0;
+          9:
+            out = 1;   
+          10:
+            out = 2;
+          11:
+            out = 3;
+          12:
+            out = 4;    
+          13:
+            out = 5;
+          14:
+            out = 6;
+          15:
+            out = 7;   
+          default:
+            out = 0;                    
+        }
+     4b0101: //7
+        case(a) {
+          0:
+            out = 0;
+          1:
+            out = 1;
+          2: 
+            out = 2;
+          3: 
+            out = 3;
+          4: 
+            out = 4;
+          5:
+            out = 5;
+          6:
+            out = 6;
+          7:
+            out = 0;
+          8:
+            out = 1;
+          9:
+            out = 2;   
+          10:
+            out = 3;
+          11:
+            out = 4;
+          12:
+            out = 5;    
+          13:
+            out = 6;
+          14:
+            out = 0;
+          15:
+            out = 1;   
+          default:
+            out = 0;                    
+        } 
+      4b0100: //6
+        case(a) {
+          0:
+            out = 0;
+          1:
+            out = 1;
+          2: 
+            out = 2;
+          3: 
+            out = 3;
+          4: 
+            out = 4;
+          5:
+            out = 5;
+          6:
+            out = 0;
+          7:
+            out = 1;
+          8:
+            out = 2;
+          9:
+            out = 3;   
+          10:
+            out = 4;
+          11:
+            out = 5;
+          12:
+            out = 0;    
+          13:
+            out = 1;
+          14:
+            out = 2;
+          15:
+            out = 3;   
+          default:
+            out = 0;                    
+        }    
+      4b0011:
+        case(a) {
+          0:
+            out = 0;
+          1:
+            out = 1;
+          2: 
+            out = 2;
+          3: 
+            out = 0;
+          4: 
+            out = 1;
+          5:
+            out = 2;
+          6:
+            out = 0;
+          7:
+            out = 1;
+          8:
+            out = 2;
+          9:
+            out = 0;   
+          10:
+            out = 1;
+          11:
+            out = 2;
+          12:
+            out = 0;    
+          13:
+            out = 1;
+          14:
+            out = 2;
+          15:
+            out = 0;   
+          default:
+            out = 0;    
+        } 
     }
   }
 }
