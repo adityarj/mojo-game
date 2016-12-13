@@ -301,7 +301,7 @@ module game (
         operator[8:0] = 0;    
     }
     //Output for current_num
-    output_digit_high = test.q;
+    output_digit_high = current_num.q/10;
     
     alu2.a = current_num.q;
     alu2.b = 0;
